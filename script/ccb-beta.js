@@ -5,6 +5,8 @@
 // @license      MIT
 // @version      2.0.2
 // @author       鼠鼠今天吃嘉然，wty2019wty
+// @updateURL    https://9981000.xyz/ccb/api/ccb-beta.js
+// @downloadURL  https://9981000.xyz/ccb/api/ccb-beta.js
 // @run-at       document-start
 // @match        https://www.bilibili.com/video/*
 // @match        https://www.bilibili.com/bangumi/play/*
