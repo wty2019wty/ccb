@@ -1,10 +1,12 @@
 // ==UserScript==
-// @name         Custom CDN of Bilibili (CCB) - 修改哔哩哔哩的网页视频、直播、番剧的播放源 ⭐ Beta
-// @description  Custom CDN of Bilibili (CCB) Beta 版本
+// @name         Custom CDN of Bilibili (CCB) Beta
+// @description  Custom CDN of Bilibili (CCB) Beta 
 // @namespace    CCB
 // @license      MIT
 // @version      2.0.2
-// @author       鼠鼠今天吃嘉然
+// @author       鼠鼠今天吃嘉然，wty2019wty
+// @updateURL    https://9981000.xyz/ccb/api/ccb-beta.js
+// @downloadURL  https://9981000.xyz/ccb/api/ccb-beta.js
 // @run-at       document-start
 // @match        https://www.bilibili.com/video/*
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -16,6 +18,7 @@
 // @match        https://www.bilibili.com/blackboard/*
 // @match        https://player.bilibili.com/*
 // @connect      kanda-akihito-kun.github.io
+// @connect      *
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -24,7 +27,8 @@
 // ==/UserScript==
 
 ;(() => {
-    const api = 'https://kanda-akihito-kun.github.io/ccb/api'
+    const defaultApi = 'https://kanda-akihito-kun.github.io/ccb/api'
+    const apiStored = 'CCB_customApi'
     const defaultCdnNode = '使用默认源'
     const manualRegionName = '手动输入'
     const mainHost = 'www.bilibili.com'
@@ -92,6 +96,11 @@
         ctx === 'live' ? liveRegionStored : (ctx === 'diagnostics' ? diagnosticsRegionStored : mainRegionStored),
         value,
     )
+    const getApiUrl = () => {
+        const custom = GM_getValue(apiStored, UNSET)
+        return custom !== UNSET ? custom : defaultApi
+    }
+    const setApiUrl = (value) => GM_setValue(apiStored, value)
     const getPowerMode = () => GM_getValue(powerModeStored, true)
     const getLiveMode = () => GM_getValue(liveModeStored, false)
     const isCcbEnabled = () => getTargetCdnNode() !== defaultCdnNode
@@ -628,7 +637,7 @@
 
     const getRegionList = async () => {
         try {
-            const data = await requestJson(`${api}/region.json`)
+            const data = await requestJson(`${getApiUrl()}/region.json`)
             if (Array.isArray(data)) regionList = [manualRegionName, ...data.filter(v => v && v !== manualRegionName && v !== '编辑')]
         } catch (_) {}
     }
@@ -636,7 +645,7 @@
     const getCdnData = async () => {
         if (cdnDataCache) return cdnDataCache
         try {
-            cdnDataCache = await requestJson(`${api}/cdn.json`)
+            cdnDataCache = await requestJson(`${getApiUrl()}/cdn.json`)
         } catch (_) {
             cdnDataCache = {}
         }
@@ -797,6 +806,40 @@
         diagnosticsBox.appendChild(mkSectionTitle('测速'))
         body.appendChild(diagnosticsBox)
         await mountRegionAndNode('diagnostics', diagnosticsBox)
+
+        const apiBox = mkSectionBox()
+        apiBox.appendChild(mkSectionTitle('自定义 API'))
+        const { row: apiRow } = mkRow('API 地址')
+        const currentApi = getApiUrl()
+        const apiInput = mkInput(currentApi === defaultApi ? '' : currentApi)
+        apiInput.placeholder = defaultApi
+        apiRow.appendChild(apiInput)
+        apiBox.appendChild(apiRow)
+        const apiActions = document.createElement('div')
+        apiActions.style.cssText = 'display:flex;gap:8px;margin-top:8px'
+        const apiSaveBtn = createButton('保存', true, false)
+        apiSaveBtn.addEventListener('click', () => {
+            const v = apiInput.value.trim()
+            if (!v || v === defaultApi) {
+                setApiUrl(defaultApi)
+                apiInput.value = ''
+            } else {
+                setApiUrl(v)
+            }
+            apiSaveBtn.textContent = '已保存'
+            setTimeout(() => { apiSaveBtn.textContent = '保存' }, 1500)
+        })
+        const apiResetBtn = createButton('恢复默认', false, false)
+        apiResetBtn.addEventListener('click', () => {
+            setApiUrl(defaultApi)
+            apiInput.value = ''
+            apiResetBtn.textContent = '已恢复'
+            setTimeout(() => { apiResetBtn.textContent = '恢复默认' }, 1500)
+        })
+        apiActions.appendChild(apiSaveBtn)
+        apiActions.appendChild(apiResetBtn)
+        apiBox.appendChild(apiActions)
+        body.appendChild(apiBox)
 
         const actions = document.createElement('div')
         actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:12px'

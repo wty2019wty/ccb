@@ -33,6 +33,7 @@ jobs:
         run: |
           mkdir -p _site/api
           cp data/*.json _site/api/
+          cp script/*.js _site/api/
           # 创建API文档页面
           cat > _site/index.html << 'EOL'
           <!DOCTYPE html>
@@ -63,6 +64,16 @@ jobs:
               <h2>Get Service Info</h2>
               <p>Returns service information including last update time.</p>
               <code>GET /api/info.json</code>
+            </div>
+            <div class="endpoint">
+              <h2>CCB Script</h2>
+              <p>Stable version of the CCB script for auto-update.</p>
+              <code>GET /api/ccb.js</code>
+            </div>
+            <div class="endpoint">
+              <h2>CCB Beta Script</h2>
+              <p>Beta version of the CCB script with latest features.</p>
+              <code>GET /api/ccb-beta.js</code>
             </div>
           </body>
           </html>
