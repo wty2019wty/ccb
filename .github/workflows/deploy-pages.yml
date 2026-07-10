@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   schedule:
     - cron: '0 21 * * 6'  # 每周日东八区凌晨 5 点 (UTC 的前一天 21 点) 运行
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发
 
 permissions:
   contents: read
